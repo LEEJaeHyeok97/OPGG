@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,19 +18,20 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    //전체 글 조회
+    //전체 게시글 조회 ,,, 페이징 관련 구현...
     @GetMapping("/")
     @ResponseBody
     public ResponseEntity<?> findAllArticles() {
-        return boardService.findAll();
+        return boardService.findAllArticles();
     }
 
 
     //글 등록
+    //JWT 토큰과 함께 글 등록하는 기능으로 수정
     @PostMapping("/registration")
     @ResponseBody
-    public ResponseEntity<?> save(@RequestBody SaveBoardReq saveBoardReq) {
-        return boardService.save(saveBoardReq);
+    public ResponseEntity<?> save(@RequestBody SaveBoardReq saveBoardReq, HttpServletRequest request) {
+        return boardService.save(saveBoardReq, request);
     }
 
     //내용만 수정
@@ -46,5 +48,5 @@ public class BoardController {
         return boardService.delete(id);
     }
 
-    //전체 게시글 조회 ,,, 페이징 관련 구현...
+
 }

@@ -6,14 +6,22 @@ import com.example.demo.global.payload.Message;
 import com.example.demo.src.user2.domain.Member;
 import com.example.demo.src.user2.domain.repository.User2Repository;
 import com.example.demo.src.user2.dto.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
+import javax.xml.bind.DatatypeConverter;
+import java.security.Key;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +29,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberService {
     private final User2Repository user2Repository;
+    @Value("${SECRET_KEY}")
+    private String SECRET_KEY;
+
+
+    //JWT 발급 코드
+    public String createToken(String email, long expTime) {
+        if (expTime <= 0) {
+            throw new RuntimeException("만료시간이 0보다 커야합니다.");
+        }
+
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+
+        byte[] secretKeyBytes = DatatypeConverter.parseBase64Binary(SECRET_KEY);
+        Key signingKey = new SecretKeySpec(secretKeyBytes, signatureAlgorithm.getJcaName());
+
+        return Jwts.builder()
+                .setSubject(email)
+                .signWith(signatureAlgorithm, signingKey)
+                .setExpiration(new Date(System.currentTimeMillis() + expTime))
+                .compact();
+    }
+
+
 
     @Transactional
     public ResponseEntity<?> signUp(SignUpReq signUpRequest) {
@@ -46,14 +77,19 @@ public class MemberService {
         if (byEmail.isPresent()) {
             Member member = byEmail.get();
             if (member.getPassword().equals(logInReq.getPassword())) {
+                String jwtToken = createToken(member.getNickname(), 2 * 1000 * 60);
+
+
+
                 LogInRes logInRes = LogInRes.builder()
                         .email(member.getEmail())
                         .password(member.getPassword())
+                        .token(jwtToken)
                         .build();
 
                 ApiResponse apiResponse = ApiResponse.builder()
                         .check(true)
-                        .information(Message.builder().message("로그인에 성공했습니다.").build())
+                        .information(Message.builder().message(jwtToken).build())
                         .build();
 
                 session.setAttribute("loginEmail", logInReq.getEmail());

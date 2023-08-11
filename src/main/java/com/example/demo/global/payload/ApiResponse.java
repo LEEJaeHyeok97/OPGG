@@ -11,6 +11,8 @@ public class ApiResponse {
 
     private Object information;
 
+
+
     public ApiResponse(){};
 
     @Builder

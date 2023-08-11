@@ -1,5 +1,6 @@
 package com.example.demo.src.board.domain;
 
+import com.example.demo.src.common.BaseEntity;
 import com.example.demo.src.user2.domain.Member;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "board_table")
-public class Board {
+public class Board extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto_increment
     private Long id;
