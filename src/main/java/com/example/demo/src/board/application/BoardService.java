@@ -7,12 +7,17 @@ import com.example.demo.src.board.dto.BoardListRes;
 import com.example.demo.src.board.dto.SaveBoardReq;
 import com.example.demo.global.payload.ApiResponse;
 import com.example.demo.src.board.dto.UpdateBoardReq;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import javax.xml.bind.DatatypeConverter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,11 +28,22 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
 
+    @Value("${SECRET_KEY}")
+    private String SECRET_KEY;
+
+
+    //복호화
+    public String getSubject(String token) {
+        Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject();
+    }
 
     @Transactional
-    public ResponseEntity<?> findAll() {
+    public ResponseEntity<?> findAllArticles() {
         try {
-            List<Board> boards = boardRepository.findAll();
+            List<Board> boards = boardRepository.findAllArticles();
 
             List<BoardListRes> boardListRes = boards.stream()
                     .map(board -> BoardListRes.builder()
@@ -54,9 +70,12 @@ public class BoardService {
     }
 
     @Transactional
-    public ResponseEntity<?> save(SaveBoardReq saveBoardReq) {
+    public ResponseEntity<?> save(SaveBoardReq saveBoardReq, HttpServletRequest request) {
+        String authorization = getSubject(request.getHeader("Authorization"));
+
+
         Board board = Board.builder()
-                .boardWriter(saveBoardReq.getBoardWriter())
+                .boardWriter(authorization)
                 .boardTitle(saveBoardReq.getBoardTitle())
                 .boardContents(saveBoardReq.getBoardContents())
                 .build();
@@ -71,6 +90,7 @@ public class BoardService {
 
         return ResponseEntity.ok(apiResponse);
     }
+
 
     @Transactional
     public ResponseEntity<?> update(Long id, UpdateBoardReq updateBoardReq) {

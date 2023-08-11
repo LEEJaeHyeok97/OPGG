@@ -10,9 +10,12 @@ public class LogInRes {
 
     private String password;
 
+    private String token;
+
     @Builder
-    public LogInRes(String email, String password) {
+    public LogInRes(String email, String password, String token) {
         this.email = email;
         this.password = password;
+        this.token = token;
     }
 }
