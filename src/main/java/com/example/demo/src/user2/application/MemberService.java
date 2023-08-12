@@ -11,9 +11,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -29,6 +31,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberService {
     private final User2Repository user2Repository;
+
     @Value("${SECRET_KEY}")
     private String SECRET_KEY;
 
@@ -58,7 +61,7 @@ public class MemberService {
         Member member = Member.builder()
                 .email(signUpRequest.getEmail())
                 .nickname(signUpRequest.getNickname())
-                .password(signUpRequest.getPassword())
+                .password(BCrypt.hashpw(signUpRequest.getPassword(), BCrypt.gensalt()))
                 .supportingTeam(signUpRequest.getSupportingTeam())
                 .build();
 
@@ -76,7 +79,7 @@ public class MemberService {
         Optional<Member> byEmail = user2Repository.findByEmail(logInReq.getEmail());
         if (byEmail.isPresent()) {
             Member member = byEmail.get();
-            if (member.getPassword().equals(logInReq.getPassword())) {
+            if (BCrypt.checkpw(logInReq.getPassword(), member.getPassword())) {
                 String jwtToken = createToken(member.getNickname(), 2 * 1000 * 60);
 
 
