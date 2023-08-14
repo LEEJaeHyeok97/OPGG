@@ -3,9 +3,11 @@ package com.example.demo.src.user2.application;
 import com.example.demo.global.payload.ApiResponse;
 import com.example.demo.global.payload.ErrorResponse;
 import com.example.demo.global.payload.Message;
+import com.example.demo.src.gpt.ChatService;
 import com.example.demo.src.user2.domain.Member;
 import com.example.demo.src.user2.domain.repository.User2Repository;
 import com.example.demo.src.user2.dto.*;
+import io.github.flashvayne.chatgpt.service.ChatgptService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -31,6 +33,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberService {
     private final User2Repository user2Repository;
+
+    private final ChatService chatService;
 
     @Value("${SECRET_KEY}")
     private String SECRET_KEY;
@@ -58,9 +62,10 @@ public class MemberService {
 
     @Transactional
     public ResponseEntity<?> signUp(SignUpReq signUpRequest) {
+
         Member member = Member.builder()
                 .email(signUpRequest.getEmail())
-                .nickname(signUpRequest.getNickname())
+                .nickname(chatService.makeNickname())
                 .password(BCrypt.hashpw(signUpRequest.getPassword(), BCrypt.gensalt()))
                 .supportingTeam(signUpRequest.getSupportingTeam())
                 .build();

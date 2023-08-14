@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 @Data
 public class SignUpReq {
 
-    @NotBlank
-    private String nickname;
 
     @NotBlank
     @Email

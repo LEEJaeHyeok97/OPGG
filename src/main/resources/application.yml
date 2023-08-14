@@ -1,7 +1,10 @@
 # 서버 포트 설정
 server:
   port: 9000
-
+  servlet:
+    encoding:
+      force: true
+      charset: UTF-8
 # database 연동 설정
 spring:
   config:
@@ -23,3 +26,6 @@ spring:
       ddl-auto: update
 
 
+  # gpt
+chatgpt:
+  api-key: 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
