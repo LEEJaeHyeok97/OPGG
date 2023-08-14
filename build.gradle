@@ -12,6 +12,8 @@ targetCompatibility = 1.8
 
 compileJava.options.encoding = 'UTF-8'
 
+
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -25,6 +27,8 @@ repositories {
 dependencies {
     implementation 'org.jetbrains:annotations:23.0.0'
 
+    //gpt
+    implementation 'io.github.flashvayne:chatgpt-spring-boot-starter:1.0.4'
 
     // Spring Boot Starter
     testImplementation('org.springframework.boot:spring-boot-starter-test')
@@ -67,6 +71,10 @@ dependencies {
 
     // Bcrypt
     implementation('org.mindrot:jbcrypt:0.4')
+
+    implementation('org.json:json:20200518')
+    implementation('com.googlecode.json-simple:json-simple:1.1.1')
+
 }
 
 test {
