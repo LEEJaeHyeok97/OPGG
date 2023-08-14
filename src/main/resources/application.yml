@@ -28,4 +28,4 @@ spring:
 
   # gpt
 chatgpt:
-  api-key: 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
+  api-key: ${API-KEY}
